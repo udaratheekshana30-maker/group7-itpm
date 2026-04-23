@@ -6,7 +6,8 @@ import {
     HiOutlineXCircle,
     HiOutlineExclamationCircle,
     HiOutlineCalendar,
-    HiOutlineCircleStack
+    HiOutlineCircleStack,
+    HiOutlineArrowLeft
 } from 'react-icons/hi2';
 import { GiWashingMachine } from 'react-icons/gi';
 import { MdOutlineLocalLaundryService } from 'react-icons/md';
@@ -272,10 +273,19 @@ const LaundryDashboard = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
-                        <h1 className="text-3xl font-black mb-2 flex items-center gap-3">
-                            <MdOutlineLocalLaundryService className="text-4xl text-indigo-200" />
-                            Laundry Dashboard
-                        </h1>
+                        <div className="flex items-center gap-4 mb-2">
+                            <button 
+                                onClick={() => window.history.back()}
+                                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-90 border border-white/10"
+                                title="Go Back"
+                            >
+                                <HiOutlineArrowLeft className="text-xl" />
+                            </button>
+                            <h1 className="text-3xl font-black flex items-center gap-3">
+                                <MdOutlineLocalLaundryService className="text-4xl text-indigo-200" />
+                                Laundry Dashboard
+                            </h1>
+                        </div>
                         <p className="text-indigo-100/80 font-medium">Book your slot and keep track of your laundry</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
