@@ -92,10 +92,10 @@ const StudentDashboard = () => {
         } else if (user) {
             fetchData();
             const interval = setInterval(() => fetchData(false), 2000); // Poll every 2s
-            
+
             const handleRefresh = () => fetchData(false);
             window.addEventListener('nmh_unread_refresh', handleRefresh);
-            
+
             return () => {
                 clearInterval(interval);
                 window.removeEventListener('nmh_unread_refresh', handleRefresh);
@@ -455,7 +455,7 @@ const DeleteProfileModal = ({ onClose, onConfirm, loading }) => {
                 <div className="modal-body py-8 px-6 space-y-6">
                     <div className="p-4 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-800/50">
                         <p className="text-xs font-bold text-rose-700 dark:text-rose-400 leading-relaxed">
-                            Deleting your profile will permanently remove your account document from the hostel database. 
+                            Deleting your profile will permanently remove your account document from the hostel database.
                             Internal hostel records (Allocations, Payments, etc.) will be purged separately by the Warden.
                         </p>
                     </div>
@@ -480,13 +480,13 @@ const DeleteProfileModal = ({ onClose, onConfirm, loading }) => {
                 </div>
 
                 <div className="modal-footer bg-slate-50 dark:bg-slate-900/50 flex gap-3 border-t dark:border-slate-800">
-                    <button 
+                    <button
                         className="flex-1 h-12 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-bold text-xs hover:bg-slate-300 transition-all cursor-pointer"
                         onClick={onClose}
                     >
                         Keep My Profile
                     </button>
-                    <button 
+                    <button
                         className="flex-1 h-12 bg-rose-600 text-white rounded-xl font-black text-xs hover:bg-rose-700 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         disabled={!password || loading}
                         onClick={() => onConfirm(password)}
@@ -805,7 +805,7 @@ const SettingsView = ({ user, onRefresh, myClearance }) => {
                             <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Permanently Remove Account</p>
                             <p className="text-xs text-slate-500 font-medium leading-relaxed leading-relaxed">As your clearance is approved, you may now proceed to delete your account. This will purge your profile document from the system. Remaining hostel logs will be archived by the Warden.</p>
                         </div>
-                        <button 
+                        <button
                             onClick={() => setShowDeleteModal(true)}
                             className="px-8 py-4 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-600/20 whitespace-nowrap"
                         >
@@ -816,7 +816,7 @@ const SettingsView = ({ user, onRefresh, myClearance }) => {
             )}
 
             {showDeleteModal && (
-                <DeleteProfileModal 
+                <DeleteProfileModal
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={handleDeleteAccount}
                     loading={isDeleting}
@@ -846,12 +846,12 @@ const DashboardView = ({ user, student, application, laundryBookings, facilityBo
                             Your academic journey continues. Stay updated with your hostel activities and notices.
                         </p>
                     </div>
-                    
+
                     {myAllocation && (
                         <div className="bg-white/10 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 text-center min-w-[240px]">
                             <div className="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-2">Currently At</div>
                             <div className="text-4xl font-black mb-1 tracking-tighter">Room {myAllocation.room?.roomNumber}</div>
-                            <div className="text-xs font-bold text-indigo-200">Bed {myAllocation.bedId} — {myAllocation.room?.floor === 0 ? 'Ground' : `${myAllocation.room?.floor}${['st','nd','rd'][myAllocation.room?.floor-1] || 'th'}`} Floor</div>
+                            <div className="text-xs font-bold text-indigo-200">Bed {myAllocation.bedId} — {myAllocation.room?.floor === 0 ? 'Ground' : `${myAllocation.room?.floor}${['st', 'nd', 'rd'][myAllocation.room?.floor - 1] || 'th'}`} Floor</div>
                         </div>
                     )}
                 </div>
@@ -861,35 +861,35 @@ const DashboardView = ({ user, student, application, laundryBookings, facilityBo
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left - Stats */}
                 <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-8">
-                    <StatCard 
-                        icon={MdOutlineLocalLaundryService} 
-                        label="Laundry" 
-                        value={(laundryBookings || []).filter(b => b.status === 'booked').length} 
-                        color="indigo" 
-                        onClick={() => navigate('/student/laundry')} 
+                    <StatCard
+                        icon={MdOutlineLocalLaundryService}
+                        label="Laundry"
+                        value={(laundryBookings || []).filter(b => b.status === 'booked').length}
+                        color="indigo"
+                        onClick={() => navigate('/student/laundry')}
                     />
-                    <StatCard 
-                        icon={HiOutlineUserGroup} 
-                        label="Facilities" 
-                        value={(facilityBookings || []).filter(b => b.status === 'booked').length} 
-                        color="emerald" 
-                        onClick={() => navigate('/student/resources')} 
+                    <StatCard
+                        icon={HiOutlineUserGroup}
+                        label="Facilities"
+                        value={(facilityBookings || []).filter(b => b.status === 'booked').length}
+                        color="emerald"
+                        onClick={() => navigate('/student/resources')}
                     />
                     {!myAllocation ? (
-                        <StatCard 
-                            icon={HiOutlineHome} 
-                            label="Room" 
-                            value="Select Bed" 
-                            color="purple" 
-                            onClick={() => navigate('/student/room-booking')} 
+                        <StatCard
+                            icon={HiOutlineHome}
+                            label="Room"
+                            value="Select Bed"
+                            color="purple"
+                            onClick={() => navigate('/student/room-booking')}
                         />
                     ) : (
-                        <StatCard 
-                            icon={HiOutlineHome} 
-                            label="Your Bed" 
-                            value={`${myAllocation.room?.roomNumber}-${myAllocation.bedId}`} 
-                            color="amber" 
-                            onClick={() => navigate('/student/room-booking')} 
+                        <StatCard
+                            icon={HiOutlineHome}
+                            label="Your Bed"
+                            value={`${myAllocation.room?.roomNumber}-${myAllocation.bedId}`}
+                            color="amber"
+                            onClick={() => navigate('/student/room-booking')}
                         />
                     )}
                 </div>
@@ -947,7 +947,7 @@ const DashboardView = ({ user, student, application, laundryBookings, facilityBo
                             <HiOutlineWallet className="text-xl" />
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Paid Months</div>
@@ -988,7 +988,7 @@ const DashboardView = ({ user, student, application, laundryBookings, facilityBo
                         <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Stay Connected</h3>
                         <p className="text-sm font-medium text-slate-500 max-w-xs">Check the latest official announcements from the warden office.</p>
                     </div>
-                    <button 
+                    <button
                         onClick={() => onRefresh && onRefresh()}
                         className="px-8 py-4 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:scale-105 transition-all"
                     >
@@ -1020,7 +1020,7 @@ const StatCard = ({ icon: Icon, label, value, color, onClick }) => {
         amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
     };
     return (
-        <div 
+        <div
             onClick={onClick}
             className={`group bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl shadow-indigo-500/5 border border-white/40 flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 cursor-pointer`}
         >
@@ -1173,7 +1173,7 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
         // Registration Number Validation: Must match email prefix (Trimmed and UpperCased)
         const emailPrefix = (formData.studentEmail || '').split('@')[0].trim().toUpperCase();
         const regNumber = (formData.registrationNumber || '').trim().toUpperCase();
-        
+
         if (regNumber !== emailPrefix) {
             toast.error(`Registration Number must match your email ID (${emailPrefix}).`);
             return false;
@@ -1257,12 +1257,12 @@ const ApplicationsView = ({ user, application: appProp, myAllocation, myClearanc
             </div>
 
             {formType === 'clearance' ? (
-                <ClearanceView 
-                    user={user} 
-                    allocation={myAllocation} 
+                <ClearanceView
+                    user={user}
+                    allocation={myAllocation}
                     application={localApp}
-                    clearance={myClearance} 
-                    onRefresh={onRefresh} 
+                    clearance={myClearance}
+                    onRefresh={onRefresh}
                 />
             ) : localApp && !isEditing ? (
                 /* ─── READ-ONLY VIEW ─────────────────────────────────────────── */
@@ -1655,7 +1655,7 @@ const ComplaintsView = ({ complaints, selectedId, setSelectedId, activeComplaint
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
         prevMessagesLength.current = currentLength;
-    }, [activeComplaint?.messages]);
+    }, [activeComplaint?.messages]);// eslint-disable-line react-hooks/exhaustive-deps
 
     const sendFeedback = async (type) => {
         if (sendingFeedback) return;
@@ -1761,9 +1761,9 @@ const ComplaintsView = ({ complaints, selectedId, setSelectedId, activeComplaint
 
     const filteredComplaints = complaints
         .filter(c => categoryFilter === 'all' || c.category === categoryFilter)
-        .filter(c => 
-            !search || 
-            c.title?.toLowerCase().includes(search.toLowerCase()) || 
+        .filter(c =>
+            !search ||
+            c.title?.toLowerCase().includes(search.toLowerCase()) ||
             c.description?.toLowerCase().includes(search.toLowerCase())
         );
 
@@ -2350,18 +2350,16 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
         return (
             <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-lg shadow-slate-100/60 dark:shadow-none transition-all border border-slate-100 dark:border-slate-800">
                 {/* Status Bar */}
-                <div className={`px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 ${
-                    isFinal ? 'bg-gradient-to-r from-emerald-50 to-slate-50 dark:from-emerald-900/20 dark:to-slate-900/50'
+                <div className={`px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 ${isFinal ? 'bg-gradient-to-r from-emerald-50 to-slate-50 dark:from-emerald-900/20 dark:to-slate-900/50'
                     : isWardenReviewed ? 'bg-gradient-to-r from-amber-50 to-slate-50 dark:from-amber-900/20 dark:to-slate-900/50'
-                    : 'bg-gradient-to-r from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/50'
-                }`}>
+                        : 'bg-gradient-to-r from-indigo-50 to-slate-50 dark:from-indigo-900/20 dark:to-slate-900/50'
+                    }`}>
                     <div className="flex items-center gap-3">
-                        <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${
-                            clearance.status === 'Rejected' ? 'bg-rose-500'
+                        <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${clearance.status === 'Rejected' ? 'bg-rose-500'
                             : clearance.status === 'Approved' ? 'bg-emerald-500'
-                            : clearance.status === 'In Progress' ? 'bg-amber-400'
-                            : 'bg-indigo-400'
-                        }`} />
+                                : clearance.status === 'In Progress' ? 'bg-amber-400'
+                                    : 'bg-indigo-400'
+                            }`} />
                         <span className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">CLEARANCE {clearance.status}</span>
                         {isWardenReviewed && !isFinal && (
                             <span className="px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full uppercase tracking-widest">Warden Reviewed</span>
@@ -2543,11 +2541,11 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
                             <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">Where should we send your security deposit refund?</p>
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 dark:bg-slate-800/30 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/50">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Account Holder Name</label>
-                            <input 
+                            <input
                                 type="text"
                                 name="accountHolderName"
                                 value={bankDetails.accountHolderName}
@@ -2558,7 +2556,7 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bank Name</label>
-                            <input 
+                            <input
                                 type="text"
                                 name="bankName"
                                 value={bankDetails.bankName}
@@ -2569,7 +2567,7 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Branch</label>
-                            <input 
+                            <input
                                 type="text"
                                 name="branchName"
                                 value={bankDetails.branchName}
@@ -2580,7 +2578,7 @@ const ClearanceView = ({ user, allocation, application, clearance, onRefresh }) 
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Account Number</label>
-                            <input 
+                            <input
                                 type="text"
                                 name="accountNumber"
                                 value={bankDetails.accountNumber}
@@ -2642,11 +2640,10 @@ const InOutView = ({ status, onRefresh, isAllocated }) => {
                             <h3 className="text-2xl font-black text-white">Attendance Status</h3>
                             <p className="text-indigo-100/60 text-xs font-bold uppercase tracking-widest mt-1">Real-time gate synchronization</p>
                         </div>
-                        <div className={`px-4 py-2 rounded-2xl border backdrop-blur-md font-black text-xs uppercase tracking-wider shadow-xl ${
-                            status?.status === 'INSIDE' 
-                            ? 'bg-emerald-500 text-white border-emerald-400' 
+                        <div className={`px-4 py-2 rounded-2xl border backdrop-blur-md font-black text-xs uppercase tracking-wider shadow-xl ${status?.status === 'INSIDE'
+                            ? 'bg-emerald-500 text-white border-emerald-400'
                             : 'bg-amber-500 text-white border-amber-400'
-                        }`}>
+                            }`}>
                             Current: {status?.status || 'UNKNOWN'}
                         </div>
                     </div>
@@ -2655,11 +2652,10 @@ const InOutView = ({ status, onRefresh, isAllocated }) => {
                 <div className="p-8 sm:p-10 space-y-10">
                     {/* Status Illustration/Icon */}
                     <div className="flex flex-col items-center justify-center py-6 text-center">
-                        <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center text-4xl mb-6 shadow-2xl ${
-                            status?.status === 'INSIDE' 
-                            ? 'bg-emerald-500/10 text-emerald-500 border-2 border-emerald-500/20' 
+                        <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center text-4xl mb-6 shadow-2xl ${status?.status === 'INSIDE'
+                            ? 'bg-emerald-500/10 text-emerald-500 border-2 border-emerald-500/20'
                             : 'bg-amber-500/10 text-amber-500 border-2 border-amber-500/20'
-                        }`}>
+                            }`}>
                             {status?.status === 'INSIDE' ? <HiOutlineHome /> : <HiOutlineArrowRightOnRectangle />}
                         </div>
                         <h4 className="text-xl font-black text-slate-800 dark:text-slate-100">
@@ -2673,8 +2669,8 @@ const InOutView = ({ status, onRefresh, isAllocated }) => {
                             )}
                         </h4>
                         <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-2 max-w-md">
-                            {status?.status === 'OUTSIDE' && status?.goingHome 
-                                ? 'You are currently marked as "Going Home". Automatic curfew late checks are suspended for this exit.' 
+                            {status?.status === 'OUTSIDE' && status?.goingHome
+                                ? 'You are currently marked as "Going Home". Automatic curfew late checks are suspended for this exit.'
                                 : 'Your status is used for security monitoring and attendance records. Use the button below to update your status at the gate.'}
                         </p>
                     </div>
@@ -2697,9 +2693,9 @@ const InOutView = ({ status, onRefresh, isAllocated }) => {
 
                     {/* Action Button */}
                     <div className="pt-4">
-                        <a 
-                            href="/student/in-out" 
-                            target="_blank" 
+                        <a
+                            href="/student/in-out"
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="w-full flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 active:scale-95 group"
                         >
