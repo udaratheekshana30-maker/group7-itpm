@@ -146,6 +146,7 @@ const LaundryDashboard = () => {
 
     const handleCancel = async (bookingId) => {
         if (!window.confirm('Cancel this booking?')) return;
+
         try {
             const res = await fetch(`${API_URL}/cancel/${bookingId}`, {
                 method: 'DELETE',
@@ -166,6 +167,7 @@ const LaundryDashboard = () => {
 
     const handleMarkAsDone = async (bookingId) => {
         if (!window.confirm('Are you done with your laundry?')) return;
+
         try {
             const res = await fetch(`${API_URL}/done/${bookingId}`, {
                 method: 'PATCH',
@@ -526,7 +528,7 @@ const LaundryDashboard = () => {
                                                         onClick={() => handleCancel(booking._id)}
                                                         className="flex-1 py-2 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
                                                     >
-                                                        Cancel
+                                                        X
                                                     </button>
                                                 </div>
                                             </div>
@@ -629,14 +631,14 @@ const LaundryDashboard = () => {
                                     <button 
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                        className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                                     >
                                         Cancel
                                     </button>
                                     <button 
                                         type="submit"
                                         disabled={bookingLoading}
-                                        className="flex-2 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 transition-all disabled:opacity-50"
+                                        className="flex-2 py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 transition-all disabled:opacity-50"
                                     >
                                         {bookingLoading ? 'Processing...' : (editingBooking ? 'Save Changes' : 'Confirm & Book')}
                                     </button>
