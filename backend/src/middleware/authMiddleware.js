@@ -78,4 +78,6 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { protect, optionalProtect, authorize, wardenOnly, studentOnly, financialManagerOnly, securityOfficerOnly };
+const admin = authorize('admin');
+
+module.exports = { protect, optionalProtect, authorize, wardenOnly, studentOnly, financialManagerOnly, securityOfficerOnly, admin };
