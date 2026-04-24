@@ -6,26 +6,22 @@ import FloorAndRoomManagement from './pages/FloorAndRoomManagement'
 import StudentApplications from './pages/StudentApplications'
 import Records from './pages/Records'
 import Landing from './pages/Landing'
-import Complaints from './pages/Complaints'
-import WardenComplaintChat from './pages/WardenComplaintChat'
 import StudentDashboard from './pages/StudentDashboard'
-import StudentComplaintChat from './pages/StudentComplaintChat'
 import Notices from './pages/Notices'
 import NoticeDetail from './pages/NoticeDetail'
-import Profiles from './pages/Profiles'
 import Resources from './pages/Resources'
+import Profiles from './pages/Profiles'
+import LaundryDashboard from './pages/LaundryDashboard';
+import LaundryManagementStaff from './pages/LaundryManagementStaff';
+import ResourceBooking from './pages/ResourceBooking';
+import ResourceManagementStaff from './pages/ResourceManagementStaff';
+import RoomBookingStudent from './pages/RoomBookingStudent';
 import { useState } from 'react'
 
 import StudentNavigationBar from './components/StudentNavigationBar'
-import FinancialNavigationBar from './components/FinancialNavigationBar'
-import FinancialDashboard from './pages/FinancialDashboard'
-import FinancialRecords from './pages/FinancialRecords'
 import SecurityNavigationBar from './components/SecurityNavigationBar'
 import SecurityDashboard from './pages/SecurityDashboard'
 import SecurityRecords from './pages/SecurityRecords'
-import StudentInOut from './pages/StudentInOut'
-import PublicStudentInOut from './pages/PublicStudentInOut'
-import WardenScanRecords from './pages/WardenScanRecords'
 import AdminNavigationBar from './components/AdminNavigationBar'
 import AdminDashboard from './pages/AdminDashboard'
 import StaffSettings from './pages/StaffSettings'
@@ -49,14 +45,7 @@ const StudentLayout = () => (
     </div>
 )
 
-const FinancialLayout = () => (
-    <div className="flex flex-col min-h-screen">
-        <FinancialNavigationBar />
-        <main className="flex-grow pt-[80px]">
-            <Outlet />
-        </main>
-    </div>
-)
+
 
 const SecurityLayout = () => (
     <div className="flex flex-col min-h-screen">
@@ -76,14 +65,16 @@ const AdminLayout = () => (
     </div>
 )
 
-const RequireRole = ({ role, children }) => {
+const RequireRole = ({ roles, children }) => {
     const { user, loading } = useAuth()
 
-    if (loading) return null
-    if (!user) return <Navigate to="/" replace />
-    if (user.role?.toLowerCase() !== role.toLowerCase()) return <Navigate to="/" replace />
+    if (loading) return null;
+    if (!user) return <Navigate to="/" replace />;
+    
+    const allowedRoles = Array.isArray(roles) ? roles.map(r => r.toLowerCase()) : [roles.toLowerCase()]
+    if (!allowedRoles.includes(user.role?.toLowerCase())) return <Navigate to="/" replace />
 
-    return children
+    return children;
 }
 
 function App() {
@@ -109,18 +100,14 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/notice/:id" element={<NoticeDetail />} />
-                <Route path="/qr" element={<PublicStudentInOut />} />
-                <Route path="/public/in-out" element={<Navigate to="/qr" replace />} />
-
                 {/* Student Routes (with StudentNavigationBar) */}
                 <Route element={<StudentLayout />}>
                     <Route path="/student" element={<StudentDashboard />} />
                     <Route path="/student/applications" element={<StudentDashboard />} />
-                    <Route path="/student/payments" element={<StudentDashboard />} />
-                    <Route path="/student/chats" element={<StudentDashboard />} />
                     <Route path="/student/settings" element={<StudentDashboard />} />
-                    <Route path="/student/complaint/:id" element={<StudentComplaintChat />} />
-                    <Route path="/student/in-out" element={<StudentInOut />} />
+                    <Route path="/student/laundry" element={<RequireRole roles="student"><LaundryDashboard /></RequireRole>} />
+                    <Route path="/student/resources" element={<RequireRole roles="student"><ResourceBooking /></RequireRole>} />
+                    <Route path="/student/room-booking" element={<RequireRole roles="student"><RoomBookingStudent /></RequireRole>} />
                 </Route>
 
                 {/* Warden/Staff Routes (with NavigationBar) */}
@@ -129,50 +116,35 @@ function App() {
                     <Route 
                         path="/room-management" 
                         element={
-                            <FloorAndRoomManagement 
-                                allocatingStudent={allocatingStudent}
-                                setAllocatingStudent={setAllocatingStudent}
-                            />
+                            <RequireRole roles={['warden', 'roombookingadmin']}>
+                                <FloorAndRoomManagement 
+                                    allocatingStudent={allocatingStudent}
+                                    setAllocatingStudent={setAllocatingStudent}
+                                />
+                            </RequireRole>
                         } 
                     />
                     <Route
                         path="/student-applications"
                         element={
-                            <StudentApplications
-                                setAllocatingStudent={setAllocatingStudent}
-                            />
+                            <RequireRole roles={['warden', 'roombookingadmin']}>
+                                <StudentApplications
+                                    setAllocatingStudent={setAllocatingStudent}
+                                />
+                            </RequireRole>
                         }
                     />
                     <Route path="/records" element={<Records />} />
-                    <Route path="/complaints" element={<Complaints />} />
-                    <Route path="/complaints/:id" element={<WardenComplaintChat />} />
                     <Route path="/notices" element={<Notices />} />
-                    <Route path="/profiles" element={<Profiles />} />
+
                     <Route path="/resources" element={<Resources />} />
-                    <Route path="/warden/scan-records" element={<WardenScanRecords />} />
+                    <Route path="/warden/laundry" element={<RequireRole roles={['warden', 'laundryadmin']}><LaundryManagementStaff /></RequireRole>} />
+                    <Route path="/warden/resources" element={<RequireRole roles={['warden', 'resourceadmin']}><ResourceManagementStaff /></RequireRole>} />
+                    <Route path="/profiles" element={<Profiles />} />
                     <Route path="/warden/settings" element={<StaffSettings />} />
                 </Route>
 
-                {/* Financial Manager Routes */}
-                <Route element={<FinancialLayout />}>
-                    <Route 
-                        path="/financial/dashboard" 
-                        element={
-                            <RequireRole role="financial">
-                                <FinancialDashboard />
-                            </RequireRole>
-                        } 
-                    />
-                    <Route 
-                        path="/financial/records" 
-                        element={
-                            <RequireRole role="financial">
-                                <FinancialRecords />
-                            </RequireRole>
-                        } 
-                    />
-                    <Route path="/financial/settings" element={<StaffSettings />} />
-                </Route>
+
 
                 {/* Security Officer Routes */}
                 <Route element={<SecurityLayout />}>
@@ -186,7 +158,7 @@ function App() {
                     <Route
                         path="/admin/dashboard"
                         element={
-                            <RequireRole role="admin">
+                            <RequireRole roles="admin">
                                 <AdminDashboard />
                             </RequireRole>
                         }
