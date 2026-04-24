@@ -146,6 +146,7 @@ const LaundryDashboard = () => {
 
     const handleCancel = async (bookingId) => {
         if (!window.confirm('Cancel this booking?')) return;
+
         try {
             const res = await fetch(`${API_URL}/cancel/${bookingId}`, {
                 method: 'DELETE',
@@ -166,6 +167,7 @@ const LaundryDashboard = () => {
 
     const handleMarkAsDone = async (bookingId) => {
         if (!window.confirm('Are you done with your laundry?')) return;
+
         try {
             const res = await fetch(`${API_URL}/done/${bookingId}`, {
                 method: 'PATCH',
