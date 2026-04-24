@@ -1,4 +1,72 @@
+
 const ResourceBooking = require('../models/ResourceBooking');
+const ResourceBookingWaitlist = require('../models/ResourceBookingWaitlist');
+// @desc    Join waitlist for a resource slot
+// @route   POST /api/resources/waitlist
+exports.joinWaitlist = async (req, res) => {
+    try {
+        const { resourceName, date, slot } = req.body;
+        if (!FACILITIES[resourceName]) {
+            return res.status(400).json({ success: false, message: 'Invalid resource' });
+        }
+        // Check if already booked
+        const existingBooking = await ResourceBooking.findOne({
+            student: req.user._id,
+            resourceName,
+            date,
+            slot,
+            status: 'booked'
+        });
+        if (existingBooking) {
+            return res.status(400).json({ success: false, message: 'You already have a booking for this slot' });
+        }
+        // Check if already on waitlist
+        const existingWait = await ResourceBookingWaitlist.findOne({
+            student: req.user._id,
+            resourceName,
+            date,
+            slot
+        });
+        if (existingWait) {
+            return res.status(400).json({ success: false, message: 'You are already on the waitlist for this slot' });
+        }
+        const waitEntry = new ResourceBookingWaitlist({
+            student: req.user._id,
+            studentName: req.user.name,
+            studentId: req.user.studentId || req.user.email.split('@')[0],
+            resourceName,
+            date,
+            slot
+        });
+        await waitEntry.save();
+        res.status(201).json({ success: true, message: 'Added to waitlist', data: waitEntry });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Get my waitlist entries
+// @route   GET /api/resources/my-waitlist
+exports.getMyWaitlist = async (req, res) => {
+    try {
+        const waitlist = await ResourceBookingWaitlist.find({ student: req.user._id }).sort({ date: 1, slot: 1 });
+        res.json({ success: true, data: waitlist });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Remove from waitlist
+// @route   DELETE /api/resources/waitlist/:id
+exports.removeFromWaitlist = async (req, res) => {
+    try {
+        const entry = await ResourceBookingWaitlist.findOneAndDelete({ _id: req.params.id, student: req.user._id });
+        if (!entry) return res.status(404).json({ success: false, message: 'Waitlist entry not found' });
+        res.json({ success: true, message: 'Removed from waitlist' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
 
 // Configuration for facilities
 const FACILITIES = {
@@ -122,6 +190,27 @@ exports.cancelBooking = async (req, res) => {
 
         booking.status = 'cancelled';
         await booking.save();
+
+        // Automated waitlist promotion: find next in waitlist for this slot
+        const nextWait = await ResourceBookingWaitlist.findOne({
+            resourceName: booking.resourceName,
+            date: booking.date,
+            slot: booking.slot
+        }).sort({ joinedAt: 1 });
+        if (nextWait) {
+            // Promote to booking
+            const newBooking = new ResourceBooking({
+                student: nextWait.student,
+                studentName: nextWait.studentName,
+                studentId: nextWait.studentId,
+                resourceName: nextWait.resourceName,
+                date: nextWait.date,
+                slot: nextWait.slot
+            });
+            await newBooking.save();
+            await ResourceBookingWaitlist.deleteOne({ _id: nextWait._id });
+            // TODO: Send notification to user (email, etc.)
+        }
         res.json({ success: true, message: 'Booking cancelled' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

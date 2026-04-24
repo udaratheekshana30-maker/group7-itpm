@@ -13,6 +13,7 @@ import {
     HiOutlineUsers
 } from 'react-icons/hi2';
 import { useAuth } from '../context/AuthContext';
+
 import toast from 'react-hot-toast';
 
 const API_URL = '/api/resources';
@@ -31,6 +32,8 @@ const ResourceBooking = () => {
     const [myBookings, setMyBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [bookingLoading, setBookingLoading] = useState(false);
+    const [myWaitlist, setMyWaitlist] = useState([]);
+    const [waitlistLoading, setWaitlistLoading] = useState(false);
 
     const [forms, setForms] = useState({
         'Gym': { purpose: '', participants: 1 },
@@ -39,9 +42,70 @@ const ResourceBooking = () => {
         'TV Lounge': { purpose: '', participants: 1 }
     });
 
+
     useEffect(() => {
         fetchData();
+        fetchWaitlist();
     }, [selectedDate]);
+    const fetchWaitlist = async () => {
+        try {
+            const res = await fetch(`${API_URL}/my-waitlist`, {
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const data = await res.json();
+            if (data.success) setMyWaitlist(data.data);
+        } catch (err) {
+            // ignore
+        }
+    };
+
+    const handleJoinWaitlist = async (resourceName, slot) => {
+        if (!window.confirm(`Slot is full. Join the waitlist for ${resourceName} at ${slot}?`)) return;
+        setWaitlistLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/waitlist`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ resourceName, date: selectedDate, slot })
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Added to waitlist!');
+                fetchWaitlist();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error('Failed to join waitlist');
+        } finally {
+            setWaitlistLoading(false);
+        }
+    };
+
+    const handleRemoveWaitlist = async (waitlistId) => {
+        if (!window.confirm('Remove from waitlist?')) return;
+        setWaitlistLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/waitlist/${waitlistId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Removed from waitlist');
+                fetchWaitlist();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error('Failed to remove from waitlist');
+        } finally {
+            setWaitlistLoading(false);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -230,7 +294,7 @@ const ResourceBooking = () => {
                                                     disabled={isFull && !slotInfo.myBooking}
                                                     className="font-bold py-2"
                                                 >
-                                                    {slot} {isFull ? '(FULL)' : `(${slotInfo.available} left)`}
+                                                    {slot} {isFull ? '(FULL - Join Waitlist)' : `(${slotInfo.available} left)`}
                                                 </option>
                                             );
                                         })}
@@ -268,6 +332,16 @@ const ResourceBooking = () => {
                             {bookingLoading ? 'Processing...' : 'Confirm Reservation'}
                             <HiOutlineBolt className="text-emerald-200 group-hover/btn:animate-pulse" />
                         </button>
+                        {/* Waitlist button for full slots */}
+                        {forms[facility].slot && (availability?.grid?.[facility]?.[forms[facility].slot]?.available <= 0) && (
+                            <button
+                                onClick={() => handleJoinWaitlist(facility, forms[facility].slot)}
+                                disabled={waitlistLoading}
+                                className="w-full py-3 mt-2 bg-amber-500 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-amber-600 shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 group/btn disabled:opacity-50 disabled:scale-100"
+                            >
+                                {waitlistLoading ? 'Processing...' : 'Join Waitlist'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -324,13 +398,35 @@ const ResourceBooking = () => {
                     </div>
                 </div>
 
-                {/* My Bookings Sidebar */}
+                {/* My Bookings & Waitlist Sidebar */}
                 <div className="lg:col-span-4 space-y-6">
                     <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 p-8 sticky top-8">
                         <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
                             <HiOutlineTicket className="text-emerald-600" />
                             My Reservations
                         </h3>
+                                                {/* Waitlist Section */}
+                                                <div className="mt-8">
+                                                    <h4 className="font-black text-amber-500 text-[10px] mb-4 uppercase tracking-widest flex items-center gap-2">
+                                                        <HiOutlineClock /> Waitlist
+                                                    </h4>
+                                                    <div className="space-y-2">
+                                                        {myWaitlist.length === 0 ? (
+                                                            <div className="text-slate-400 text-xs">No waitlist entries</div>
+                                                        ) : (
+                                                            myWaitlist.map(w => (
+                                                                <div key={w._id} className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 rounded-xl px-3 py-2 text-xs font-bold">
+                                                                    <span>{w.resourceName} | {w.date} | {w.slot}</span>
+                                                                    <button
+                                                                        onClick={() => handleRemoveWaitlist(w._id)}
+                                                                        disabled={waitlistLoading}
+                                                                        className="text-amber-600 hover:text-amber-900 text-[10px] font-black ml-2"
+                                                                    >Remove</button>
+                                                                </div>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
                         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                             {myBookings.length === 0 ? (
                                 <div className="text-center py-10 text-slate-400 font-medium">
