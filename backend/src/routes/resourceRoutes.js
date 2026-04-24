@@ -1,16 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const resourceController = require('../controllers/resourceController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { 
+    getAvailability, 
+    bookResource, 
+    getMyBookings, 
+    getAllBookings, 
+    updateStatus, 
+    deleteBooking,
+    cancelBooking,
+    getResources,
+    addResource,
+    deleteResource
+} = require('../controllers/resourceController');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
-// Student routes
-router.get('/availability', protect, resourceController.getAvailability);
-router.post('/book', protect, resourceController.bookResource);
-router.get('/my-bookings', protect, resourceController.getMyBookings);
-router.delete('/cancel/:id', protect, resourceController.cancelBooking);
+// Public/Student routes
+router.get('/list', protect, getResources);
+router.get('/availability', protect, getAvailability);
+router.post('/book', protect, bookResource);
+router.get('/my-bookings', protect, getMyBookings);
+router.delete('/cancel/:id', protect, cancelBooking);
 
-// Staff routes
-router.get('/all', protect, admin, resourceController.getAllBookings);
-router.patch('/status/:id', protect, admin, resourceController.updateStatus);
+// Admin routes (Warden and ResourceAdmin allowed)
+const resourceAdmin = authorize('admin', 'warden', 'resourceadmin');
+
+router.post('/admin/add', protect, resourceAdmin, addResource);
+router.delete('/admin/resource/:id', protect, resourceAdmin, deleteResource);
+router.get('/admin/all', protect, resourceAdmin, getAllBookings);
+router.patch('/admin/status/:id', protect, resourceAdmin, updateStatus);
+router.delete('/admin/delete/:id', protect, resourceAdmin, deleteBooking);
 
 module.exports = router;

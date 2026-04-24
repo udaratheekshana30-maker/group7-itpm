@@ -1,43 +1,30 @@
 const mongoose = require('mongoose');
 
-const resourceSchema = new mongoose.Schema(
-  {
-    // ── Individual Resource fields (Sports Gear, Books, etc.) ────────
-    name: { type: String, default: null }, // Optional for room-centric docs
-    category: { type: String, required: true }, // e.g. 'ROOM_GOOD', 'SPORTS', etc.
-    status: {
-      type: String,
-      enum: ['AVAILABLE', 'ALLOCATED', 'MAINTENANCE', 'OCCUPIED', 'MISSING'],
-      default: 'AVAILABLE',
-    },
-
-    // ── Room metadata (Common for all items in the array) ────────────
+const ResourceSchema = new mongoose.Schema({
     roomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Room',
-      default: null
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room'
     },
-    roomRef: { type: String, default: null },
-    floorNumber: { type: Number, default: null },
-
-    // ── NEW: Room furniture array (One doc per room) ─────────────────
-    items: [
-      {
-        bedId: { type: String, enum: ['A', 'B'], required: true },
-        itemType: { type: String, enum: ['CHAIR', 'CUPBOARD', 'TABLE'], required: true },
-        uniqueCode: { type: String, default: null },
+    roomRef: String,
+    floorNumber: Number,
+    category: {
+        type: String,
+        default: 'ROOM_GOOD'
+    },
+    items: [{
+        bedId: String,
+        itemType: String,
+        uniqueCode: String,
         status: {
-          type: String,
-          enum: ['AVAILABLE', 'OCCUPIED', 'MISSING', 'MAINTENANCE'],
-          default: 'AVAILABLE'
+            type: String,
+            default: 'AVAILABLE'
         }
-      }
-    ],
-  },
-  {
-    collection: 'resources',
-    timestamps: true
-  }
-);
+    }],
+    name: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 
-module.exports = mongoose.model('Resource', resourceSchema);
+module.exports = mongoose.model('Resource', ResourceSchema);

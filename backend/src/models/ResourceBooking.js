@@ -23,14 +23,22 @@ const resourceBookingSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['booked', 'completed', 'cancelled'],
-        default: 'booked'
+        enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
+        default: 'pending'
+    },
+    qrCode: {
+        type: String, // Innovative: QR code for automated entry
+        default: null
+    },
+    approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     createdAt: {
         type: Date,
         default: Date.now
     }
-});
+}, { timestamps: true });
 
 // We allow multiple bookings per slot up to capacity, so no unique index on slot alone.
 // However, a student shouldn't book the same resource twice for the same slot.

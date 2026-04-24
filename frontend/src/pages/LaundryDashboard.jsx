@@ -145,8 +145,6 @@ const LaundryDashboard = () => {
     };
 
     const handleCancel = async (bookingId) => {
-        if (!window.confirm('Cancel this booking?')) return;
-
         try {
             const res = await fetch(`${API_URL}/cancel/${bookingId}`, {
                 method: 'DELETE',
@@ -166,8 +164,6 @@ const LaundryDashboard = () => {
     };
 
     const handleMarkAsDone = async (bookingId) => {
-        if (!window.confirm('Are you done with your laundry?')) return;
-
         try {
             const res = await fetch(`${API_URL}/done/${bookingId}`, {
                 method: 'PATCH',
@@ -513,24 +509,24 @@ const LaundryDashboard = () => {
                                                 <BookingTimer slot={booking.slot} date={booking.date} status={booking.status} />
                                                 <div className="flex gap-2">
                                                     <button 
-                                                        onClick={() => handleMarkAsDone(booking._id)}
-                                                        className="flex-2 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20"
-                                                    >
-                                                        Done
-                                                    </button>
-                                                    <button 
                                                         onClick={() => openEditModal(booking)}
-                                                        className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
+                                                        className="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button 
                                                         onClick={() => handleCancel(booking._id)}
-                                                        className="flex-1 py-2 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
+                                                        className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
                                                     >
-                                                        X
+                                                        Cancel
                                                     </button>
                                                 </div>
+                                                <button 
+                                                    onClick={() => handleMarkAsDone(booking._id)}
+                                                    className="w-full mt-2 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+                                                >
+                                                    Mark as Done
+                                                </button>
                                             </div>
                                         )}
                                     </div>
@@ -627,21 +623,48 @@ const LaundryDashboard = () => {
                                     />
                                 </div>
 
-                                <div className="pt-4 flex gap-4">
-                                    <button 
-                                        type="button"
-                                        onClick={() => setShowModal(false)}
-                                        className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        type="submit"
-                                        disabled={bookingLoading}
-                                        className="flex-2 py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 transition-all disabled:opacity-50"
-                                    >
-                                        {bookingLoading ? 'Processing...' : (editingBooking ? 'Save Changes' : 'Confirm & Book')}
-                                    </button>
+                                <div className="pt-4 space-y-4">
+                                    <div className="flex gap-4">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowModal(false)}
+                                            className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                        >
+                                            Close
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            disabled={bookingLoading}
+                                            className="flex-2 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-500/30 transition-all disabled:opacity-50"
+                                        >
+                                            {bookingLoading ? 'Processing...' : (editingBooking ? 'Update Details' : 'Confirm & Book')}
+                                        </button>
+                                    </div>
+
+                                    {editingBooking && (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowModal(false);
+                                                    handleMarkAsDone(editingBooking._id);
+                                                }}
+                                                className="py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 dark:border-emerald-800"
+                                            >
+                                                Mark as Done
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowModal(false);
+                                                    handleCancel(editingBooking._id);
+                                                }}
+                                                className="py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all border border-rose-100 dark:border-rose-800"
+                                            >
+                                                Cancel Booking
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </form>
                         </div>

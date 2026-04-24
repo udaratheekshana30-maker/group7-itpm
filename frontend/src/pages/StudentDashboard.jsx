@@ -69,6 +69,7 @@ const StudentDashboard = () => {
     const [uploadingProfile, setUploadingProfile] = useState(false);
     const profilePicInputRef = useRef(null);
     const [notices, setNotices] = useState([]);
+    const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // activeTab based on URL
@@ -131,6 +132,7 @@ const StudentDashboard = () => {
             await fetchClearanceData();
             await fetchLaundryData();
             await fetchFacilityData();
+            await fetchNotifications(showLoading);
         } catch (err) {
             console.error('Error fetching data:', err);
         } finally {
@@ -256,13 +258,39 @@ const StudentDashboard = () => {
     const fetchFacilityData = async () => {
         if (!user?.token) return;
         try {
-            const res = await fetch(`${API}/resources/my-bookings`, {
+            const res = await fetch(`${API}/facilities/my-bookings`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             const data = await res.json();
             if (data.success) setFacilityBookings(data.data);
         } catch (err) {
             console.error('Facility fetch error:', err);
+        }
+    };
+
+    const fetchNotifications = async (showLoading = true) => {
+        if (!user?.token) return;
+        try {
+            const res = await fetch(`${API}/notifications`, {
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const data = await res.json();
+            if (data.success) setNotifications(data.data);
+        } catch (err) {
+            console.error('Notification fetch error:', err);
+        }
+    };
+
+    const markNotificationsAsRead = async () => {
+        if (!user?.token || notifications.filter(n => !n.isRead).length === 0) return;
+        try {
+            await fetch(`${API}/notifications/read`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        } catch (err) {
+            console.error('Error marking as read:', err);
         }
     };
 
@@ -421,7 +449,24 @@ const StudentDashboard = () => {
                 </div>
             </div>
 
-            {activeTab === 'dashboard' && <DashboardView user={user} student={studentData} application={application} notices={notices} laundryBookings={laundryBookings} facilityBookings={facilityBookings} myAllocation={myAllocation} navigate={navigate} onProfilePicDelete={handleProfilePicDelete} uploadingProfile={uploadingProfile} handleProfilePicUpload={handleProfilePicUpload} profilePicInputRef={profilePicInputRef} />}
+            {activeTab === 'dashboard' && (
+                <DashboardView 
+                    user={user} 
+                    student={studentData} 
+                    application={application} 
+                    notices={notices} 
+                    notifications={notifications}
+                    onMarkRead={markNotificationsAsRead}
+                    laundryBookings={laundryBookings} 
+                    facilityBookings={facilityBookings} 
+                    myAllocation={myAllocation} 
+                    navigate={navigate} 
+                    onProfilePicDelete={handleProfilePicDelete} 
+                    uploadingProfile={uploadingProfile} 
+                    handleProfilePicUpload={handleProfilePicUpload} 
+                    profilePicInputRef={profilePicInputRef} 
+                />
+            )}
             {activeTab === 'applications' && (
                 <ApplicationsView
                     user={user}
@@ -826,7 +871,9 @@ const SettingsView = ({ user, onRefresh, myClearance }) => {
     );
 };
 
-const DashboardView = ({ user, student, application, laundryBookings, facilityBookings, myAllocation, notices, navigate, onProfilePicDelete, uploadingProfile, myStatus }) => {
+const DashboardView = ({ user, student, application, laundryBookings, facilityBookings, myAllocation, notices, notifications, onMarkRead, navigate, onProfilePicDelete, uploadingProfile, myStatus }) => {
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
     return (
         <div className="space-y-12 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             {/* Welcome Banner */}
@@ -856,6 +903,53 @@ const DashboardView = ({ user, student, application, laundryBookings, facilityBo
                     )}
                 </div>
             </div>
+
+            {/* Notification Bar */}
+            {notifications.length > 0 && (
+                <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2.5rem] border border-indigo-100 dark:border-slate-800 p-8 shadow-xl shadow-indigo-500/5 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <HiOutlineMegaphone className="text-2xl text-indigo-600" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full animate-bounce"></span>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-tighter">Student Alerts</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{unreadCount} New Messages</p>
+                            </div>
+                        </div>
+                        {unreadCount > 0 && (
+                            <button 
+                                onClick={onMarkRead}
+                                className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl transition-all"
+                            >
+                                Mark All as Read
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="space-y-3">
+                        {notifications.slice(0, 3).map(n => (
+                            <div key={n._id} className={`p-5 rounded-2xl border transition-all flex items-start gap-4 ${n.isRead ? 'bg-slate-50/50 border-slate-100 dark:bg-slate-800/30 dark:border-slate-800' : 'bg-indigo-50/50 border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 shadow-sm'}`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-slate-100 text-slate-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                    <HiOutlineCheckBadge className="text-xl" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start">
+                                        <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-tight">{n.title}</h4>
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">
+                                        {n.message}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Stats & Activity Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
