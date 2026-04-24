@@ -107,10 +107,14 @@
     }
 
     .nav-bar {
-        @apply fixed top-0 left-0 w-full z-50 transition-all duration-300;
+        @apply fixed top-0 left-0 w-full z-50 transition-all duration-500 will-change-transform;
         height: 72px;
         background: var(--primary);
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-bar.hidden-nav {
+        @apply -translate-y-full opacity-0 shadow-none pointer-events-none;
     }
 
     .dark .nav-bar {
@@ -154,7 +158,7 @@
     }
 
     .nav-links {
-        @apply flex items-center gap-1 overflow-x-auto px-2 py-3; /* Added padding */
+        @apply hidden lg:flex items-center gap-1 overflow-x-auto px-2 py-3; /* Added padding */
         scrollbar-width: none;
         -ms-overflow-style: none;
         margin: -12px 0; /* Offset the padding to keep layout stable */
@@ -307,10 +311,25 @@
 
     .form-input,
     .form-select {
-        @apply w-full px-4 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all duration-200;
+        @apply w-full px-4 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 transition-all duration-200;
+        height: 48px !important;
         border: 1px solid;
         @apply border-slate-200 dark:border-slate-700;
         border-radius: var(--radius-sm);
+        box-sizing: border-box !important;
+        display: block;
+        line-height: normal;
+    }
+
+    input[type="date"].form-input {
+        min-height: 48px !important;
+        -webkit-appearance: none;
+        display: flex;
+        align-items: center;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        @apply dark:filter dark:invert transition-all opacity-50 hover:opacity-100 cursor-pointer;
     }
 
     .form-input::placeholder {
@@ -324,11 +343,28 @@
 
     /* ═══════════ FILTER BAR ═══════════ */
     .filter-bar {
-        @apply flex flex-wrap gap-4 items-end p-5 mb-6 bg-white dark:bg-slate-800/80;
+        @apply grid grid-cols-2 md:flex md:flex-wrap gap-4 items-end p-5 mb-6 bg-white dark:bg-slate-800/80;
         border-radius: var(--radius);
         border: 1px solid;
         @apply border-slate-200/80 dark:border-slate-700/50;
         box-shadow: var(--shadow-sm);
+    }
+    
+    @media (max-width: 640px) {
+        .filter-bar {
+            @apply grid grid-cols-2 gap-4 p-5 mb-6;
+        }
+        .filter-bar .form-group {
+            @apply min-w-0 flex flex-col justify-end !important;
+            flex: 1 1 0; 
+            margin: 0 !important;
+        }
+        .filter-bar .form-group:last-child {
+            @apply col-span-2 mt-4 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-white/5 flex-row gap-2 !important;
+        }
+        .filter-bar .form-group:last-child button {
+            @apply h-[48px] font-black text-xs uppercase tracking-widest flex-1;
+        }
     }
 
     .export-bar {
@@ -762,6 +798,15 @@
         @apply text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-1;
     }
 
+    /* ── UTILITIES ── */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
     .profile-centered .email {
         @apply text-sm font-medium text-slate-400 dark:text-slate-500 mb-6;
     }
@@ -773,6 +818,223 @@
 
     .text-success {
         @apply text-emerald-600 dark:text-emerald-400;
+    }
+
+    /* ═══════════ MOBILE MENU DRAWER ═══════════ */
+    .mobile-menu-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background-color: rgba(2, 6, 23, 0.8) !important;
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.25s ease-out;
+    }
+
+    .mobile-menu-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        width: 300px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        /* Forced colors for maximum contrast regardless of theme */
+        background-color: #1A3263 !important;
+        box-shadow: -10px 0 50px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        color: #ffffff !important;
+    }
+
+    .dark .mobile-menu-drawer {
+        background-color: #0d1b3e !important;
+        border-l: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mobile-menu-header {
+        padding: 32px 24px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu-header p {
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.25em !important;
+        color: #FAB95B !important; /* Gold accent for the label */
+        margin-bottom: 4px !important;
+    }
+
+    .mobile-menu-header h3 {
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        color: #ffffff !important;
+        letter-spacing: -0.02em !important;
+        margin: 0 !important;
+    }
+
+    .mobile-menu-header button {
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 12px !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        transition: all 0.2s !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        cursor: pointer !important;
+    }
+
+    .mobile-menu-header button:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        transform: scale(1.05);
+    }
+
+    .mobile-menu-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .mobile-nav-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 16px !important;
+        border-radius: 14px !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        transition: all 0.25s ease !important;
+        color: rgba(255, 255, 255, 0.9) !important; /* Solid high-contrast white */
+        background-color: transparent !important;
+        text-decoration: none !important;
+    }
+
+    .mobile-nav-link svg {
+        width: 22px !important;
+        height: 22px !important;
+        flex-shrink: 0;
+        color: inherit !important;
+    }
+
+    .mobile-nav-link.active {
+        background-color: #FAB95B !important;
+        color: #1A3263 !important;
+        box-shadow: 0 8px 30px rgba(250, 185, 91, 0.4) !important;
+        transform: translateX(4px);
+    }
+
+    .mobile-nav-link.active svg {
+        color: #1A3263 !important;
+    }
+
+    .mobile-nav-link:not(.active):hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        padding-left: 20px !important;
+    }
+
+    /* Standard Tailwind-like responsiveness for the drawer */
+    @media (min-width: 1024px) {
+        .mobile-menu-overlay,
+        .mobile-menu-drawer {
+            display: none !important;
+        }
+    }
+
+    /* ═══════════ MOBILE USER SECTION ═══════════ */
+    .mobile-user-section {
+        margin-top: auto !important;
+        padding: 24px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background-color: rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .mobile-user-card {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .mobile-user-avatar {
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 14px !important;
+        background-color: #FAB95B !important;
+        color: #1A3263 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 900 !important;
+        font-size: 22px !important;
+        overflow: hidden !important;
+        border: 2.5px solid rgba(255, 255, 255, 0.2) !important;
+        flex-shrink: 0 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .mobile-user-info h4 {
+        margin: 0 !important;
+        font-size: 17px !important;
+        font-weight: 900 !important;
+        color: #ffffff !important;
+        letter-spacing: -0.01em !important;
+        line-height: 1.2 !important;
+    }
+
+    .mobile-user-info p {
+        margin: 2px 0 0 0 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: rgba(255, 255, 255, 0.5) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.15em !important;
+    }
+
+    .mobile-logout-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        padding: 16px !important;
+        border-radius: 16px !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        font-weight: 900 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.15em !important;
+        font-size: 13px !important;
+        transition: all 0.25s !important;
+        cursor: pointer !important;
+    }
+
+    .mobile-logout-btn:hover {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #ffffff !important;
+        border-color: rgba(239, 68, 68, 0.4) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 
     /* ═══════════ STAT CARD ═══════════ */
